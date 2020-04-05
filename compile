@@ -1,0 +1,6 @@
+#!/bin/bash --
+# gcc -fms-extensions -s -O2 -o vgmck vgmck.c vgmck_*.c
+test vgmck.h -nt vgmck.o && touch vgmck.c
+ls vgmck.c vgmck_*.c | sed -r 's/^(.*)\.c$/test \1.c -nt \1.o \&\& (echo \1; gcc -fms-extensions -O2 -c \1.c)/' | bash
+echo '(link)'
+gcc -s -O2 -o vgmck vgmck.o vgmck_*.o -lm
