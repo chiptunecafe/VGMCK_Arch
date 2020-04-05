@@ -1,6 +1,10 @@
 # VGMCK_Arch
 A fork of zzo38's VGMCK MML to VGM Compiler, doubling as an archive of the original version.
 
+# To Do
+* Figure out the compilation dependencies
+* Fix the Eof offset
+
 # Currently Supported Sound Chips
 * SN76489 PSG (SMS/GG, BBC Micro, PCjr, Tandy)
 * OPL2/YM3812
@@ -38,7 +42,3 @@ A fork of zzo38's VGMCK MML to VGM Compiler, doubling as an archive of the origi
 * Fast forward
 * Portamento
 * And more...
-
-# To Do
-* Figure out the compilation dependencies
-* Fix the Eof offset
