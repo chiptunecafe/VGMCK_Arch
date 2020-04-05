@@ -1,4 +1,4 @@
-# VGMCK_Archive
+# VGMCK_Arch
 A fork of zzo38's VGMCK MML to VGM Compiler, doubling as an archive of the original version.
 
 # Currently Supported Sound Chips
