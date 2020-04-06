@@ -138,7 +138,7 @@ typedef struct SampleLoader {
   };
 } SampleLoader;
 
-// Global variables
+// Global variables`
 extern FILE*outfp;
 extern ChipDef*chipsets;
 extern ChanDef channel[52];
