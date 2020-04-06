@@ -1134,24 +1134,26 @@ static inline void help_list_chips(void) {
 
 int main(int argc,char**argv) {
   int i;
-  if(argc<2) {
-    fprintf(stderr,"VGMCK v" VERSION "\nusage: vgmck {output} < {input}\n");
+  if(argc<3) {
+    fprintf(stderr,"VGMCK v" VERSION "\nusage: vgmck {input.mml} {output.vgm}\n");
     return 1;
-  } //else if(argv[1][0]=='-') {
-    // switch(argv[1][1]) {
-      // case 'L':
-        // help_list_chips();
-        // break;
-    // }
-    // return 0;
-  //}
+  }
   for(i=0;i<12;i++) note_freq[i]=pow(2.0,((double)i)/12.0);
   for(i=12;i<32;i++) note_freq[i]=1.99999;
   basefreq=3520.0*pow(2.0,3.0/12.0);
-  read_input(stdin);
+  FILE*infp = fopen(argv[1],"r"); // input file - special thx to Christoph Neidahl/OPNA2608
+  if (infp == NULL) {
+	  fprintf(stderr,"Failed to open input file '%s'.\n",argv[1]);
+	  return 1;
+  }
+  read_input(infp);
+  fclose(infp);
   for(i=0;i<52;i++) if(channel[i].chip && channel[i].text) parse_music(i);
-  outfp=fopen(argv[1],"wb");
-  if(!outfp) return 1;
+  outfp=fopen(argv[2],"wb"); // output file
+  if(outfp == NULL) {
+	  fprintf(stderr,"Failed to write output file '%s'.\n",argv[2]);
+	  return 1;
+  }
   write_vgm_header();
   chipsets_begin_end(1);
   make_event_out();
