@@ -2,7 +2,7 @@
 A fork of zzo38's VGMCK MML to VGM Compiler, doubling as an archive of the original version.
 
 # To Do
-* Fix the Eof offset
+* Improve command line syntax
 
 # Currently Supported Sound Chips
 * SN76489 PSG (SMS/GG, BBC Micro, PCjr, Tandy)
