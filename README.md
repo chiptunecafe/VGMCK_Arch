@@ -2,10 +2,7 @@
 A fork of zzo38's VGMCK MML to VGM Compiler, doubling as an archive of the original version.
 
 # Usage
-`vgmck {output} < {input}`
-
-# To Do
-* Improve command line syntax
+`vgmck {input.mml} {output.vgm}`
 
 # Currently Supported Sound Chips
 * SN76489 PSG (SMS/GG, BBC Micro, PCjr, Tandy)
