@@ -4,6 +4,9 @@ A fork of zzo38's VGMCK MML to VGM Compiler, doubling as an archive of the origi
 # Usage
 `vgmck {input.mml} {output.vgm}`
 
+# Wiki (WIP)
+https://github.com/chiptunecafe/VGMCK_Arch/wiki
+
 # Currently Supported Sound Chips
 * SN76489 PSG (SMS/GG, BBC Micro, PCjr, Tandy)
 * OPL2/YM3812
