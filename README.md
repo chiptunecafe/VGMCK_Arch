@@ -7,8 +7,9 @@ A fork of zzo38's VGMCK MML to VGM Compiler, doubling as an archive of the origi
 # Wiki (WIP)
 https://github.com/chiptunecafe/VGMCK_Arch/wiki
 
-# To Do
-* Fix T6W28 noise LFSR (16 -> 15 bit) & pitch
+# Long Term Goals
+* T6W28: Add fixed noise pitches
+* SN76489: Add noise pulse & fixed noise pitches
 
 # Currently Supported Sound Chips
 * SN76489 PSG (SMS/GG, BBC Micro, PCjr, Tandy)
