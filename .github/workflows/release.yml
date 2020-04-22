@@ -1,0 +1,171 @@
+name: Release
+on:
+  push:
+    tags:
+    - "[0-9]+.*"
+
+env:
+  BIN_MAIN: vgmck
+  BIN_DEBUG: vgmck_d
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  Build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+
+    steps:
+    - name:  Getting GitHub Release tag
+      id:    vars
+      run:   |
+        echo ::set-output name=tag::${GITHUB_REF:10}
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          echo ::set-output name=ext::zip
+          echo ::set-output name=mime::zip
+        else
+          echo ::set-output name=ext::tar.gz
+          echo ::set-output name=mime::gzip
+        fi
+
+    - name:  Checkout
+      uses:  actions/checkout@v2
+
+    - name:  Get 32-Bit MinGW [Windows]
+      if:    runner.os == 'Windows'
+      run:   choco install -q mingw -x86
+
+    - name:  Build [Linux]
+      if:    runner.os == 'Linux'
+      run:   |
+        cd src
+        make -j2 CFLAGS_COMMON="-fms-extensions -static" LDFLAGS_COMMON="-lm -static"
+    - name:  Build [macOS]
+      if:    runner.os == 'macOS'
+      run:   |
+        cd src
+        make -j2 CC=clang
+    - name:  Build [Windows]
+      if:    runner.os == 'Windows'
+      run:   |
+        cd src
+        export PATH="/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw32/bin:$PATH"
+        mingw32-make -j2 CFLAGS_COMMON="-fms-extensions -static" LDFLAGS_COMMON="-lm -static"
+
+    - name: Test (Launching binaries)
+      run:  |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          export BIN_EXT=".exe"
+        fi
+        for vgmckbin in ./src/{$BIN_MAIN,$BIN_DEBUG}${{ env.BIN_EXT }}; do
+          vgmckbin_name=$(basename "$vgmckbin")
+          echo "Testing $vgmckbin_name launching..."
+          set +e
+          $vgmckbin
+          output=$($vgmckbin 2>&1)
+          set -e
+          echo $output | grep "usage:" > /dev/null
+        done
+
+    - name:  Test (Compiling examples)
+      run:   |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          export BIN_EXT=".exe"
+        fi
+        for vgmckbin in ./src/{$BIN_MAIN,$BIN_DEBUG}${{ env.BIN_EXT }}; do
+          vgmckbin_name=$(basename "$vgmckbin")
+          echo "Testing $vgmckbin_name compilation..."
+          for mmlfile in ./examples/*.mml; do
+            mmlfile_name=$(basename "$mmlfile")
+            if [ ! "$mmlfile_name" == "template.mml" ]; then
+              echo "- $mmlfile_name"
+              $vgmckbin $mmlfile test.vgm
+            fi
+          done
+        done
+
+    - name:  Packaging
+      run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          export BIN_EXT=".exe"
+        fi
+        mkdir packaging
+        cp -r docs examples LICENSE README.md src/{$BIN_MAIN,$BIN_DEBUG}${{ env.BIN_EXT }} packaging
+
+        cd packaging
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          7z a -tzip ../VGMCK-${{ steps.vars.outputs.tag }}-${{ runner.os }}.zip .
+        else
+          tar -cvf- * | gzip -9c > ../VGMCK-${{ steps.vars.outputs.tag }}-${{ runner.os }}.tar.gz
+        fi
+
+    - name:  Uploading artifact
+      uses:  actions/upload-artifact@v1
+      with:
+        name: ${{ runner.os }}
+        path: VGMCK-${{ steps.vars.outputs.tag }}-${{ runner.os }}.${{ steps.vars.outputs.ext }}
+
+  Release:
+    needs: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name:  Getting GitHub Release tag
+      id:    vars
+      run:   |
+        echo ::set-output name=tag::${GITHUB_REF:10}
+    - name:  Fetch Linux artifact
+      uses:  actions/download-artifact@v1
+      with:
+        name: Linux
+    - name:  Fetch macOS artifact
+      uses:  actions/download-artifact@v1
+      with:
+        name: macOS
+    - name:  Fetch Windows artifact
+      uses:  actions/download-artifact@v1
+      with:
+        name: Windows
+
+    - name:  Create Release
+      id:    create_release
+      uses:  actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.vars.outputs.tag }}
+        release_name: VGMCK ${{ steps.vars.outputs.tag }}
+        draft: false
+        prerelease: false
+
+    - name:  Upload Linux Release
+      uses:  actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./Linux/VGMCK-${{ steps.vars.outputs.tag }}-Linux.tar.gz
+        asset_name: VGMCK-${{ steps.vars.outputs.tag }}-Linux.tar.gz
+        asset_content_type: application/gzip
+    - name:  Upload macOS Release
+      uses:  actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./macOS/VGMCK-${{ steps.vars.outputs.tag }}-macOS.tar.gz
+        asset_name: VGMCK-${{ steps.vars.outputs.tag }}-macOS.tar.gz
+        asset_content_type: application/gzip
+    - name:  Upload Windows Release
+      uses:  actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./Windows/VGMCK-${{ steps.vars.outputs.tag }}-Windows.zip
+        asset_name: VGMCK-${{ steps.vars.outputs.tag }}-Windows.zip
+        asset_content_type: application/zip
+

@@ -1,0 +1,103 @@
+name: CI
+on:
+  push:
+    branches:
+    - "*"
+    tags-ignore:
+    - "[0-9]+.*"
+    paths-ignore:
+    - "docs/**"
+    - "LICENSE"
+    - "README.md"
+  pull_request:
+    paths-ignore:
+    - "docs/**"
+    - "LICENSE"
+    - "README.md"
+
+env:
+  BIN_MAIN: vgmck
+  BIN_DEBUG: vgmck_d
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  Build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+
+    steps:
+    - name:  Checkout
+      uses:  actions/checkout@v2
+
+    - name:  Get 32-Bit MinGW [Windows]
+      if:    runner.os == 'Windows'
+      run:   choco install -q mingw -x86
+
+    - name:  Build [Linux]
+      if:    runner.os == 'Linux'
+      run:   |
+        cd src
+        make -j2 CFLAGS_COMMON="-fms-extensions -static" LDFLAGS_COMMON="-lm -static"
+    - name:  Build [macOS]
+      if:    runner.os == 'macOS'
+      run:   |
+        cd src
+        make -j2 CC=clang
+    - name:  Build [Windows]
+      if:    runner.os == 'Windows'
+      run:   |
+        cd src
+        export PATH="/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw32/bin:$PATH"
+        mingw32-make -j2 CFLAGS_COMMON="-fms-extensions -static" LDFLAGS_COMMON="-lm -static"
+
+    - name: Test (Launching binaries)
+      run:  |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          export BIN_EXT=".exe"
+        fi
+        for vgmckbin in ./src/{$BIN_MAIN,$BIN_DEBUG}${{ env.BIN_EXT }}; do
+          vgmckbin_name=$(basename "$vgmckbin")
+          echo "Testing $vgmckbin_name launching..."
+          set +e
+          $vgmckbin
+          output=$($vgmckbin 2>&1)
+          set -e
+          echo $output | grep "usage:" > /dev/null
+        done
+
+    - name:  Test (Compiling examples)
+      run:   |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          export BIN_EXT=".exe"
+        fi
+        for vgmckbin in ./src/{$BIN_MAIN,$BIN_DEBUG}${{ env.BIN_EXT }}; do
+          vgmckbin_name=$(basename "$vgmckbin")
+          echo "Testing $vgmckbin_name compilation..."
+          for mmlfile in ./examples/*.mml; do
+            mmlfile_name=$(basename "$mmlfile")
+            if [ ! "$mmlfile_name" == "template.mml" ]; then
+              echo "- $mmlfile_name"
+              $vgmckbin $mmlfile test.vgm
+            fi
+          done
+        done
+
+    - name:  Packaging
+      run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          export BIN_EXT=".exe"
+        fi
+        mkdir packaging
+        cp -r docs examples LICENSE README.md src/{$BIN_MAIN,$BIN_DEBUG}${{ env.BIN_EXT }} packaging
+
+    - name:  Uploading artifact
+      uses:  actions/upload-artifact@v1
+      with:
+        name: VGMCK-${{ runner.os }}-${{ github.sha }}
+        path: packaging
+
