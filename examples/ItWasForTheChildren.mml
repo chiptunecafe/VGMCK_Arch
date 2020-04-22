@@ -1,0 +1,31 @@
+#TITLE-E StarTropics - It Was For The Children
+#GAME-E VGMCK TEST
+#COMPOSER Yoshio Hirai
+#PROGRAMER TakuikaNinja
+#SYSTEM NeoGeo Pocket
+
+#EX-NGP ABC,D
+
+@v1 = {12 12 12 11 11 11 11 10 10 9 9 9 9 8 8 8 8 7}
+
+ABCD t100
+ABCD L
+ABC @v1
+D @0v13
+AD P0
+B P-2
+C P2
+
+C r8
+ABCD L
+
+A r8 >b8 >e8 f+8 g8 a8 f+8 d8 e2^4^8 f+16 g16 f+8 d8 <b2^8 a8 b1
+A r8 b8 >e8 f+8 g8 a8 f+8 d8 e2 b8 a8 g8 a2^8 f+4 d4 e1
+B [e4 >e4 f+4 g4 <c4 >c4 d4 e4 <d4 >d4 e4 f+4 <e4 >e4 f+4 g4<]2
+C [b4 b4 b4 b4 g4 g4 g4 g4 a4 a4 a4 a4 b4 b4 b4 b4]2
+D >>e1 c1 d1 e1 e1 >c1 <d1 e1
+
+A e2 d4^8 c8 <b2^4^8 b8 a1 b1
+B c4 >c4 <d4 >d4 <g4 >g4 a4 b4 <f4 >f4 g4 a4 <b4 >b4 b2<
+C g4 g4 a4 a4 >d4 d4 d4 d4 c4 c4 c4 c4 f+4 f+4
+D c2 d2 g1 f1 b1

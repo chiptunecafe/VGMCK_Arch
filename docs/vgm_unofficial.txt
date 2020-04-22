@@ -1,0 +1,254 @@
+== Unofficial VGM Extensions ==
+
+Unofficial header starting points:
+* v1.61: $000000C0
+
+Data blocks for these extensions starts $07 $67 $66 ... and then act like
+normal data block commands. Data streams start $07 $90 and use the same
+data stream as the normal command.
+
+Used chips commands:
+* one parameter: $30 $31 $32 $33 $3F $4F $50
+* two parameters: $40 $41 $42 $43 $44 $45 $46 $47 $48
+* three parameters: $C0 $C1
+* four parameters: $E0
+
++         +         +        +     +     +                               +
+|   low   |  high   | header | num |     |                               |
+| version | version | offset | ber | mem | chip                          |
+/=========/=========/========/=====/=====/===============================/
+|    1.61 |    1.61 |  $0000 | $00 |   - | PC speaker                    |
+|    1.61 |    1.61 |  $0004 | $01 |   - | Famicom Disk System           |
+|    1.61 |    1.61 |  $0008 | $02 |   - | Konami VRC6                   |
+|    1.61 |    1.61 |  $000C |   - |   - | (OPLL custom patch set)       |
+|    1.61 |    1.61 |  $0010 | $03 | $C0 | Nintendo MMC5                 |
+|    1.61 |    1.61 |  $0014 | $04 |   - | Namco 163                     |
+|    1.61 |    1.61 |  $0018 | $05 |   - | SN76489                       |
+|    1.61 |    1.61 |  $001C | $06 |   - | Commodore 64 SID              |
+|    1.61 |    1.61 |  $0020 | $07 | $80 | Amiga Paula                   |
+|    1.61 |    1.61 |  $0024 | $08 |   - | Ensoniq 5503 DOC              |
+|    1.61 |    1.61 |  $0028 | $09 | $C1 | SPC700 S-DSP                  |
+|    1.61 |    1.61 |  $002C | $0A | $81 | Impulse Tracker VM            |
+|    1.61 |    1.61 |  $0030 | $0B |   - | Yamaha YM2414 (OPZ)           |
+|    1.61 |    1.61 |  $0034 | $0C |   - | Philips SAA 1099              |
+|    1.61 |    1.61 |  $0038 | $0D |   - | Commodore VIC                 |
+|    1.61 |    1.61 |  $003C | $0E |   - | SN76477                       |
+|    1.61 |    1.61 |  $0040 | $0F | $82 | OKIM9810                      |
+|    1.61 |    1.61 |  $0044 | $10 |   - | OKIM6376                      |
+|    1.61 |    1.61 |  $0048 | $11 |   - | Atari TIA                     |
++         +         +        +     +     +                               +
+
+
+== PC speaker ==
+
+$07 $31 $xx: Write port 0x61 (speaker control), only low 2 bits are used.
+
+$07 $32 $xx: Write port 0x42 (PIT data).
+
+$07 $33 $xx: Write port 0x43 (PIT control).
+
+It cannot be dual-chip.
+
+
+== Famicom Disk System ==
+
+$07 $40 $xx $yy: Write $yy to register $xx, where you have to subtract
+$4040 from the register address to make the $xx setting.
+
+Second instance uses bit7 set of the register address.
+
+
+== Konami VRC6 ==
+
+$07 $41 $xx $yy: Write $yy to register $xx. Bit13, bit12, bit1, bit0 of
+the actual VRC6 address corresponds to bit3, bit2, bit1, bit0 of the $xx
+address.
+
+Second instance uses bit7 set of the register address.
+
+
+== (OPLL custom patch set) ==
+
+This header, if nonzero, is a relative offset of a custom OPLL patch set
+in the .VGM file. It consists of 120 bytes, in the order from instrument 1
+to instrument 15.
+
+Both instances use the same patch set.
+
+
+== Nintendo MMC5 ==
+
+$07 $42 $xx $yy: Write $yy to register $xx, where you have to subtract
+$5000 from the register address. to make the $xx setting.
+
+Second instance uses bit7 set of the register address.
+
+
+== Namco 163 ==
+
+$07 $43 $xx $yy: Write value $yy to register $xx. Actual register numbers
+are used.
+
+Second instance uses bit7 set of the register address.
+
+
+== SN76489 ==
+
+It uses the same flag headers as the main SN76489, but allows an extra
+instance and separate clock rates (if both headers have dual-chip bit set,
+then you can have up to four instances; some arcade games use this).
+
+The commands are the same as the standard SN76489 ($50, $4F, $30, $3F) but
+with the $07 prefix at the front.
+
+
+== Commodore 64 SID ==
+
+$07 $48 $xx $yy: Write value $yy to register $xx. Subtract $D400 (which is
+54272 in decimal) from the address.
+
+Second instance uses bit7 set of the register address.
+
+The high bit of the clock rate specifies the chip revision. It should be
+0 to use 6581, and 1 to use 8580. The player might have an option to
+override this.
+
+
+== Amiga Paula ==
+
+(don't know)
+
+
+== Ensoniq 5503 DOC ==
+
+(don't know)
+
+
+== SPC700 S-DSP ==
+
+The CPU (S-SMP) is not used; only the audio registers and audio RAM are
+used. Only SPCDRGA and SPCDDAT are used, and they are both set using the
+same command in VGM.
+
+$07 $44 $xx $yy: Write value $yy to the audio register $xx.
+
+Second instance uses bit7 set of the register address.
+
+
+== Impulse Tracker VM ==
+
+$07 $C0 $xx $yy $zz: Write value $zz to register $yy of channel $xx (0 to
+127 if dual-chip bit is cleared; 0 to 255 if dual-chip bit is set).
+
+$07 $E0 $xx $yy $zz $zz: As above, but write to register $yy and $yy+1.
+
+The ROM stores the sample and instrument data, up to 64K. Channels 128 to
+255 use the second chip instance.
+
+All registers are small endian.
+
+Register $00-$01: Points to a sample header.
+
+Register $02-$03: Points to a instrument header. The NNA, DCT, DCA, PPS,
+PPC, RV, RP, MCh, MPr, TrkVers, NoS, and Note-Sample/Keyboard Table is not
+used. Other things, such as envelopes, is used.
+
+Register $04-$07: Set note frequency.
+
+Register $08: Bit0 and bit1 = set note command: 0=note on, 1=note off,
+2=note cut, 3=note fade. Bit2 = reset filters/etc to those in instrument
+header.
+
+Register $09: Envelope speed.
+
+Register $0A: Channel volume (0 to 64).
+
+Register $0B: Channel panning (0 to 255).
+
+Register $0C: Tremor. Set to zero to cancel.
+
+Register $0D: Vibrato. Set to zero to cancel.
+
+Register $0E: Global volume (0 to 128). This affects all channels.
+
+Register $0F: Fine vibrato. Set to zero to cancel. Vibrato and fine
+vibrato cancel each other.
+
+Register $10: Sample volume (0 to 64).
+
+Register $11: Tremolo. Set to zero to cancel.
+
+Register $12-$13: Set sample offset (automatically resets to zero upon a
+note on command received).
+
+Register $14: Vibrato waveform. Set bit3 to suppress vibrato retrigger.
+
+Register $15: Panbrello. Set to zero to cancel.
+
+Register $16: Tremolo waveform. Set bit3 to suppress tremolo retrigger.
+
+Register $17: Panbrello waveform. Set bit3 to suppress panbrello retrigger.
+
+Register $18: Bit0 = surround on. Bit1 = volume envelope on. Bit2 = pan
+envelope on. Bit3 = pitch envelope on. Bit4 = filter envelope on. Bit5 =
+makes the sample backward. (This register is reset, except for bit0, by
+setting bit2 of register $08.)
+
+Register $19: Bit6 to bit0 set filter cutoff. Bit7 is set for high-pass
+filter, cleared for low-pass filter.
+
+Register $1A: Bit6 to bit0 set filter resonance. Bit7 is set to activate
+the filter.
+
+Register $1B: Set reverb for this channel. Zero cancels reverb.
+
+
+== Yamaha YM2414 (OPZ) ==
+
+(don't know)
+
+
+== Philips SAA 1099 ==
+
+$07 $45 $xx $yy: Write $yy to register $xx.
+
+Second instance uses bit7 set of the register address.
+
+
+== Commodore VIC ==
+
+$07 $46 $xx $yy: Write value $yy to register $xx. Register numbers must
+subtract $900A.
+
+Second instance uses bit7 set of the register address.
+
+
+== SN76477 ==
+
+$07 $C1 $xx $yy $yy: Write value $yy to pin $xx (1-based numbering; pins
+2, 13, 14, and 15 are not used). These values are signed. Writing $8000
+means the pin is disconnected.
+
+Second instance uses bit7 set of the register address.
+
+(TODO: Specify units of the register values.)
+
+
+== OKIM9810 ==
+
+$07 $47 $xx $yy: Write value $yy to register $xx.
+
+Second instance uses bit7 set of the register address.
+
+
+== OKIM6376 ==
+
+(don't know)
+
+
+== Atari TIA ==
+
+$07 $48 $xx $yy: Write value $yy to register $xx. Subtract $15 from the
+TIA register address to make the $xx number.
+
+Second instance uses bit7 set of the register address.
