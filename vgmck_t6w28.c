@@ -127,14 +127,22 @@ static Event*x_set_macro(int chan,int dyn,int command,signed short value) {
 static Event*x_note_on(int chan,long note,int oct,long dur) {
   Event1*e=malloc(sizeof(Event1));
   e->type=3;
-  e->value=note;
+  if (chan == 3) {
+	  e->value=note/(0.9375)+9*0.9375; // accounting for 15 bit LFSR
+  } else {
+    e->value=note;
+  }
   return (Event*)e;
 }
 
 static Event*x_note_change(int chan,long note,int oct) {
   Event1*e=malloc(sizeof(Event1));
   e->type=3;
-  e->value=note;
+  if (chan == 3) {
+	  e->value=note/(0.9375)+9*0.9375; // accounting for 15 bit LFSR
+  } else {
+    e->value=note;
+  }
   return (Event*)e;
 }
 
