@@ -1,0 +1,70 @@
+; This file is in public domain (no copyright).
+
+#TITLE-E Caverns of Zeux - Heaven
+#GAME-E Caverns of Zeux
+#COMPOSER Gregory Janson
+#PROGRAMER zzo38
+#SYSTEM VGMCK
+
+#EX-OPL3 F,ABCDE
+
+@x0 = {
+  $C4 $0D $E3 $24 $06
+  $C0 $3A $E7 $84 $10
+  $02 $15 $E2 $22 $10
+  $01 $00 $E3 $23 $00
+  $10 ; a+(b:c:d)
+}
+
+@x1 = {
+  $10 $0A $E3 $13 $11
+  $00 $00 $E3 $13 $00
+  $11 $0A $E3 $13 $11
+  $01 $00 $E3 $13 $00
+  $21 ; (a:b)+(c:d)
+}
+
+@x2 = {
+  $20 $00 $90 $05 $00
+  $21 $10 $90 $05 $10
+  $22 $00 $90 $05 $00
+  $23 $02 $90 $05 $00
+  $30 ; a+(b:c)+d
+}
+
+@x3 = {
+  $11 $01 $D3 $33 $06
+  $01 $21 $D3 $33 $07
+  $10 ; a+b
+}
+
+*+ ?CK0?DK4?.
+*- ?CK0?DK3?.
+*# ?CK12?DK4?.
+
+ABCDEF t120r16P0
+C v59
+D v57K3
+E v57K7
+
+A o3@0v63l8 [>c4c4c4c<b- ^4^b->e-e-d4<]4
+B o2@1v61l1 r ^ ^ ^ l4[c^^8c8<b- ^1>]2
+CDE o3@2l1 r ^ ^ ^ ^ ^ ^ ^
+F o2@3v54l8 [cgc'gcgc'b- ^f<b->b->e-dc<b- v58]4
+
+ABCDEF L
+
+A [>c4c4c4c<b- ^4^b->e-e-d4<]4
+B [c^^8c8<b- ^1>]3 c^^8c8<b- g1>
+CDE l2[*-c^4^8<*+b-8 ^>*-g]3 *-c^4^8<*+b-8 ^>b-
+F [cgc'gcgc'b- ^f<b->b->e-dc<b-]3 cgc'gcgc'b- ^gb->de-dc<b-
+
+A [a-a-^a-c'4a-b- ^4^b->e-e-d4<]3
+B <a-2.b- ^1 f2.g ^1 a-2.b- ^1>
+CDE <*+a-2.^8b-8 ^1> *-f2.^8g8 ^1 <*#a-2.^8b-8 ^1>
+F a-e-c4^4.<b-> df^4^2 ^1 ^1 ^1 ^1
+
+A >g2.b-4 g1<
+B g1 gfe-d
+CDE *-g1 *+g1
+F <gb->dg^g^f <gb>dg^4.d

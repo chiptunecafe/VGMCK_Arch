@@ -1,0 +1,1141 @@
+This file is a document for VGMCK.
+
+Supported chips: 14/34,0/18
+
+
+== GD3 tags ==
+
+The VGM format supports GD3 tags for including text in the file. In this
+document, the line numbers of GD3 will be zero-based. GD3 tags are UTF-16
+format in the VGM file, although this program accepts ASCII, UTF-8, and
+CESU-8 encodings for GD3 tags (you cannot use Shift-JIS).
+
+Leading and trailing spaces will normally be truncated, although you can
+use the overlong UTF-8 encodings of spaces to make the spaces keep on.
+
+
+== Numeric ==
+
+You can specify numbers in VGMCK by decimal, optional - or + to give the
+sign, or you can use hexadecimal with $ before it. Hexadecimal numbers are
+written in uppercase.
+
+
+== Top level commands ==
+
+
+;  (comment)
+
+A comment; put whatever you want and is ignored by the compiler.
+
+
+#COMPOSER  (set GD3 composer tag)
+
+This command sets line 6 and 7 of the GD3. You can also use #COMPOSER-E
+and #COMPOSER-J to set only the English or Japanese text; this is
+recommended over setting both together.
+
+
+#DATE  (set GD3 date tag)
+
+This command sets line 8 of GD3 tags. The recommended date format is
+"yyyy/mm/dd".
+
+
+#DEBUG-INPUT-LINES  (display lines as it is being read)
+
+This displays input lines as it is being read. It might be useful for
+debugging.
+
+
+#EOF  (end of file)
+
+Stop reading from stdin. It is not normally very useful.
+
+
+#EQUAL-TEMPERAMENT  (make equal temperament)
+
+It is useful only after a #SCALE command, to split the octave into an
+equal division by the number of notes in one octave.
+
+
+#EX-???  (chip select)
+
+Select the chip. The channel groups will come next, with letters by the
+channel identifiers in each group, separated by commas. After that you
+have optional parameters with the letter to identify, equal sign, and
+value. Making chips doubled and assigning channel to unused slots of the
+registers of the chip, is being done automatically.
+
+
+#GAME  (set GD3 game name tag)
+
+This command sets line 2 and 3 of the GD3. You can also use #GAME-E and
+#GAME-J to set only the English or Japanese text; this is recommended over
+setting both together. This corresponds to the #ALBUM command in XPMCK.
+
+
+#INCLUDE  (include MML input file)
+
+Include another MML input file, for example one containing chip setting,
+channel setting, instruments, etc.
+
+
+#JUST-INTONATION  (set note pitch by rational numbers)
+
+You can use this to make the note pitch given by fraction numbers instead
+of by equal temperament. Give the alternating numerator and denominator,
+separated by commas.
+
+
+#LOOP-BASE  (loop base)
+
+Set the loop base header of VGM. The number specified is how many loop
+count to reduce by. You can use negative numbers to increase the loop
+counter instead.
+
+
+#LOOP-MODIFIER  (loop modifier)
+
+Set the loop modifier header of VGM. The number of times loop is multiply
+by number specify here and divide by sixteen. For example, if you put 32
+then it is played twice.
+
+
+#MIDI-TEXT  (MIDI text encoding)
+
+Specify the character encoding of MIDI text events. The default is zero.
+The possible setting can be: 0 = ASCII, 1 = ISO-8859-1, 2 = UTF-8. The
+Microsoft Windows specific characters of ISO-8859-1 are not supported (use
+UTF-8 instead, if you need those characters). (The text events in this MML
+file itself are always encoded using UTF-8.)
+
+
+#NOTES  (set GD3 notes tag)
+
+Set line 10 of GD3. You can have more than one it automatically add line
+breaks as required.
+
+
+#PITCH-CHANGE  (base frequency of notes)
+
+This command set the base frequency of "C" notes, in decihertz.
+
+
+#PROGRAMER  (set GD3 programmer tag)
+
+Set line 9 of GD3. The misspelling is actually the correct usage.
+
+
+#RATE  (frame rate)
+
+The frame rate is set in hertz, such as 60 for NTSC and 50 for PAL. If it
+is positive, it will set the VGM header to make rate scaling at playback.
+If it is negative, it will not use rate scaling at playback. Whatever
+number you specify, will also be used as frame rate for macro envelopes.
+
+
+#SCALE  (musical scale letters)
+
+Specify the letters of the musical scale, which can be "a" to "j". You can
+use "." to include empty spaces. You can have up to 32 steps in one scale.
+The default setting is: c.d.ef.g.a.b
+
+
+#SYSTEM  (set GD3 system tag)
+
+This command sets line 4 and 5 of the GD3. You can also use #SYSTEM-E and
+#SYSTEM-J to set only the English or Japanese text; this is recommended
+over setting both together. It is recommended to use the common system
+name with the same capitalization and spelling as other files.
+
+
+#TEXT???  (custom GD3 tag)
+
+You can set other line of GD3 by putting the number in place of "???". The
+numbers 0 to 10 is used for standard GD3 tags, you can add other number
+for additional tags. Note: Using this is not compatible with standard GD3
+formats.
+
+
+#TITLE  (set GD3 title tag)
+
+This command sets line 0 and 1 of the GD3. You can also use #TITLE-E and
+#TITLE-J to set only the English or Japanese text; this is recommended
+over setting both together. The name of the song should be specified.
+
+
+#UNOFFICIAL  (enable unofficial features of .VGM format)
+
+This command currently does nothing.
+
+
+#VOLUME  (volume adjustment)
+
+Make the global volume adjustment. The number can be -64 to +192 except
+that -63 is not allowed. It is a logarithmic adjustment where 32 steps
+is multiply/divide by two.
+
+
+"  (GD3 notes)
+
+This is the same as #NOTES command, but you can have leading spaces.
+
+
+@???  (macro envelope define)
+
+You can define a macro envelope for use in music commands, by a number 0
+to 255. For example @v0 = { 0 3 5 } defines a volume envelope. It is
+allowed to span multiple lines. See the description in the section below
+for more information.
+
+
+*???  (text macro)
+
+Make a text macro. After * put a single ASCII character to represent this.
+After that, is the text used in the replacement macro in a music entry.
+
+
+ABC  (music entry)
+
+Music can be added by the channel letters, uppercase and lowercase, any
+amount of them, follow by space and the music commands. If you put any
+letter twice then it will make that track twice as much.
+
+
+== Macro envelope ==
+
+A macro envelope is defined by the command like @v1 = { and then the
+contents and } at the end.
+
+Numbers: You can use numbers to enter them directly.
+
+Loop block: Use [ ] surround the block, and after ] immediately have a
+number of times which it repeats.
+
+Loop point: Use | to specify the loop restart point, which will restart
+the effect from that point when the } is reached.
+
+Gradient: Have two numbers with : in between, it will make a slope which
+steps gradually from the initial value to the final value.
+
+Slow down: Use ' and a number. This will make the numbers entered until
+another ' command to be repeated by that many times, instead of being just
+once. The ' is also local to the loop block, so it will also be restored
+by the ] end of loop block.
+
+Name: The macro envelope can have a name in quotation marks. Usually this
+will be the filename for sample playback, but it might be something else.
+
+
+== Macro commands ==
+
+Note: Mostly they are the same commands in music commands to enable this
+envelope; there are a few exceptions.
+
+
+@v  (software volume envelope)
+
+Set the volume, same as the v command for the chip being used. (Some chips
+cannot use software envelopes on all channels, but most can.)
+
+
+@P  (software panning envelope)
+
+Set the panning, same as the P command for the chip being used.
+
+
+@@  (tone envelope)
+
+Make the tone changing while the music is playing, same as the @ command
+for the chip in use.
+
+
+@x  (option)
+
+Set options for the channel of the chip, such as the parameters of FM
+synthesis. Use the @ command of the channel to select it.
+
+
+@EN  (arpeggio)
+
+Make the arpeggio. Each number is the semitones up/down relative to the
+previous note being played. (Do not use @EN in a music directly; use EN
+and ENOF instead.)
+
+
+@M  (multiplication)
+
+Set the envelope of multiplication parameter, as the M command of the chip
+which is being used.
+
+
+@W  (wave table)
+
+Make a wave table. The length and values allowed depends on the chip.
+There is no static/dynamic versions of this command; only @W is used.
+
+
+@S  (sample data)
+
+This is used to load sample data for sample playback. The name is a
+filename, and is a file containing a header (specific to the chip) if no
+header data is included directly in the macro block, otherwise it contains
+raw data with no header. If it is starting with "?" then it is a WAV file,
+and is using the WAV header. If it is starting with "#" then it uses built
+in waveforms and synthesizers, and can specify data of the synthesizer by
+including them after the | in the macro data. (Note: WAV file load is not
+currently implemented.)
+
+
+@SL  (sample list)
+
+This macro makes a list of samples to play based on the range of notes.
+The data is the sample numbers, with a comma and note and octave number,
+to tell how much it is up to, and then the next sample numbers and notes.
+
+
+@MIDI  (MIDI conversion specification)
+
+Not implemented.
+
+
+== Music commands ==
+
+
+a b c d e f g h i j  (note letters)
+
+Play a note in the current octave. Normally h i j is not used, unless you
+specify it by #SCALE command. After the letter, you can have + for sharp,
+- for flat, ' for high octave, and can have the length number and/or dots
+to increase the length.
+
+
+r  (rest)
+
+Make a rest. You can still use the length afterward.
+
+
+w  (wait)
+
+Same as rest, but will not send a command to the chip (usually will have
+the same result, though).
+
+
+@w  (wait by frames)
+
+Specify number of frames to wait, optionally followed by a comma and a
+shift count in case you want a fractional number of frames. Negative
+numbers can also be used for the number of frames, but be careful of it.
+
+
+^  (extend note)
+
+Extends the length of the note, such as being tied between bars (you do
+not necessarily have to do it this way, but I find it clearer). You can
+have length afterward.
+
+
+&  (join note)
+
+Join a note to the next one.
+
+
+/  (portamento)
+
+Portamento between notes according to the portamento setting. Some modes
+of portamento do not work on some chips, especially if you portamento
+between notes in different octaves.
+
+
+@/  (portamento set)
+
+This command set up the portamento. It must be followed by the numbers
+separated by commas, as follows: mode,time,step. The mode is: 0 = Amiga,
+1 = glissando. The time specifies how many half of frames that the pitch
+should be updated. The step, if nonzero, will cause it to change by that
+amount every time, until it reaches the note it strives for, instead of
+automatically reaching when it is due.
+
+
+n  (direct note)
+
+Specify a note by the key number (0 = C of octave 0 by default). To have
+length numbers afterward, you need a comma.
+
+
+l  (length)
+
+Set the length of notes which do not have the length already specified.
+
+
+o  (set octave)
+
+Set the current octave by a number. Zero is the lowest number.
+
+
+>  (high octave)
+
+Increment current octave number.
+
+
+<  (low octave)
+
+Decrement current octave number.
+
+
+t  (tempo)
+
+Set the tempo. In the current version this won't affect the length of the
+note unless l is also specified; this might change in later versions.
+
+
+D  (detune)
+
+Set a detune amount. Zero means normal playing. Exactly how much will be
+detuned and what numbers you needs depends on the chips.
+
+
+K  (transpose)
+
+Set the number of semitones to transpose further notes up/down on this
+channel. If you enter another K then the previous transpose is cancelled.
+
+
+L  (song loop point)
+
+When the song loops automatically, it starts from this point.
+Desynchronized loops are not supported.
+
+
+[ ]  (block loop)
+
+Make a local repeat block, the number after ] means how many times to
+repeat. This loop is allowed to be desynchronized.
+
+
+\  (repeat first time)
+
+Anything between \ ] is made only the first time of the repeat.
+
+
+{ }  (triple notes)
+
+Anything in { } is length 2/3 of its normal length.
+
+
+@q  (note quantize)
+
+Set number of frames before the note length of which it will stop. Write
+@q0 to make the note stop when it stops, or write @q1 to make the note
+stop one frame before it stops.
+
+
+v  (volume)
+
+Set the volume level. Zero is quiet volume. The maximum number, and the
+difference of linear/logarithmic volume, depend on the chip.
+
+
+P  (panning)
+
+Set the panning. Zero is center, negative is left side, positive is right
+side. The range depends on the chip.
+
+
+@  (tone)
+
+Set the tone. How it is used depend on the chip.
+
+
+@G  (global setting)
+
+Set the global setting of the chip, rather than specific to each channel.
+What it means depend on the chip.
+
+
+M  (multiplier)
+
+Set a multiplier. What it means depend on the chip.
+
+
+@W  (select carrier wave table)
+
+Select the table for the carrier waveform. Its use depends on the chip.
+
+
+@WM  (select modulator wave table)
+
+Select the table for the modulator waveform. Its use depends on the chip.
+
+
+ve  (hardware volume envelope)
+
+Used to make a hardware volume envelope. Its use depends on the chip.
+
+
+EN  (arpeggio)
+
+Activate arpeggio defined by @EN macro.
+
+
+ENOF  (not arpeggio)
+
+Deactivate arpeggio.
+
+
+NOE  (note off event)
+
+Set the note off event. NOE0 is normal. NOE1 sends note off only when a
+new note starts (or a rest). NOE2 disables all note off events. Envelopes
+still run only for the normal note duration (minus quantize) though.
+
+
+x  (direct register write)
+
+Put the address and data separated by comma. This is written directly to
+the register of the chip. What it will do, is dependent on the chip.
+
+
+y  (direct VGM write)
+
+The number you put is directly the byte to output into the VGM file. If
+you use a wrong number, you will probably mess it up so much that it won't
+play anymore. (Note: Do not use this to enter delay commands; use @w for
+waiting instead. You should not use command $66 either since that will
+damage the VGM header.)
+
+
+?  (track questioning)
+
+After ? if there is a letter of a track, if it matches this one it will
+continue, otherwise it is suppressed up to the next ? command. If you
+write ?. then it will not be suppressed. It can be used in text macros.
+
+
+*  (call text macro)
+
+Call a text macro indicated by the ASCII character placed afterward.
+
+
+@[ ]  (auto track switch)
+
+If this command is used in multiple channels, and you name them inside of
+the brackets, then it can be used to automatically switch after every
+note, rest, and wait (but not ties). This might be used to allow a note to
+finish playing while another note starts. You can write @[] with no
+letters in between to disable this function. You can include dots in
+between to access no channel at those steps.
+
+
+!  (data cut)
+
+Stop the current track and don't read the rest.
+
+
+@!  (fast forward)
+
+Cause all delays to be omitted (globally) until this point is reached. Can
+optionally have a number, to indicate rewinding that many frames.
+
+
+== Built-in samples ==
+
+
+#d #D  (direct data)
+
+Everything after the | is the direct data (#d for 8-bits, #D for 16-bits).
+
+
+#p #P  (repeated data)
+
+If you use #p then data is 8-bits and if #P then 16-bits. The data is pair
+of count and value.
+
+
+#s #S  (sine wave)
+
+Start by a number (negative for signed) of the length. After that are
+amplitude/wavelength pairs. (#s for 8-bits and #S for 16-bits.)
+
+
+== Debug chip implementation ==
+
+Command: #EX-DEBUG
+Macro commands: (any)
+Channel groups: (any)
+
+c (1) = Clock rate in Hz. If negative, note periods are used. If zero, the
+note numbers are used directly.
+
+n (16) = Note bits.
+
+o (9) = Basic octave.
+
+x (1) = Miscellaneous.
+
+y (0) = Miscellaneous.
+
+This is not a real chip and is not sent to the .VGM file. Any commands and
+notes are allowed, and all of them are sent to the stdout. This is mostly
+used to debug VGMCK itself, and is not normally very useful otherwise.
+
+
+== SN76489 PSG (Sega, BBC Micro, PCjr, Tandy) ==
+
+Command: #EX-PSG
+Macro commands: v (0..15) P (-1..+1)
+Channel groups: square (6), noise (2)
+
+F (9) = Feedback register. It might not work properly unless it has
+exactly two bits set. Use 9 for Sega Master System 2/Game Gear/Mega Drive,
+3 for Sega Computer 3000H/BBC Micro, and 6 for SN76494/SN76496. It is not
+recommended to use other numbers here.
+
+H (3579545) = Clock rate in Hz.
+
+S (16) = Shift register. Use 16 for Sega Master System 2/Game Gear/Mega
+Drive and 15 for Sega Computer 3000H/BBC Micro. It is not recommended to
+use other numbers here.
+
+d (on) = Enable /8 clock divider.
+
+f (off) = Frequency 0 is 0x400 if this is turned on.
+
+n (off) = Output negate flag.
+
+s (on) = Enable stereo.
+
+For the noise channel, use of the notes e f f+ is recommended.
+
+
+== OPL2 (Yamaha YM3812) ==
+
+Command: #EX-OPL2
+Macro commands: v (0..63) @ (macro) @G (0..15)
+Channel groups: melody (18), Hat (2), Cymbal (2), Tom (2), SD (2), BD (2)
+
+H (3579545) = Clock rate in Hz.
+
+The @ command selects a macro defined by @x which sets up the operators:
+
+* 0: Tremolo/Vibrato/Sustain/KSR/Freq.Mul for modulator. (Bit7 sets
+tremolo, bit6 sets vibrato, bit5 makes the sustain level maintained until
+the note is released, bit4 shortens the envelope by high pitch, low 4 bits
+set the frequency multiplier: 0=1/2, 1 to 10=1 to 10, 12=12, 14=15)
+
+* 1: Tremolo/Vibrato/Sustain/KSR/Freq.Mul for carrier.
+
+* 2: Key Scaling/Output Level for modulator (if additive mode is used, it
+is relative to the user volume). (High 2 bits reduce volume by high pitch,
+low 6 bits set the volume (all bits clear is maximum volume))
+
+* 3: Key Scaling/Output Level for carrier (relative to user volume).
+
+* 4: Attack/Decay for modulator. (High 4 bits are attack and low 4 bits
+are decay; zero is slow and fifteen is fast)
+
+* 5: Attack/Decay for carrier.
+
+* 6: Sustain/Release for modulator. (High 4 bits are sustain level and low
+4 bits are release rate; sustain level uses zero for no attenuation and
+fifteen for most attenuation)
+
+* 7: Sustain/Release for carrier.
+
+* 8: Waveform for modulator. Waveforms: 0=sine, 1=only positive,
+2=absolute, 3=only rising of absolute
+
+* 9: Waveform for carrier.
+
+* 10: Feedback/Algorithm. Bit 3,2,1 selects feedback, and bit 0 selects
+algorithm (set for additive, clear for FM).
+
+* 11: Used only with hat and cymbal channels, change the relative octave
+setting of the two channels used. This can be positive, negative, or zero.
+
+The operator setting will be shared for the hat, snare, and cymbal
+channels, due to the function of OPL2. The tom and bass drum channels have
+their own operators, although the hat, snare, tom, and cymbal channels all
+share the same notes, unless the hat and cymbal channels are not used.
+
+The @G command changes global settings for the current chip instance:
+
+* 1 = set for 14 cents vibrato, clear for 7 cents vibrato.
+
+* 2 = set for 4.8 dB tremolo, clear for 1 dB tremolo.
+
+* 4 = selects the keyboard split point (unsure how it works).
+
+* 8 = set for composite sine wave speech synthesis (unsure how it works;
+it is not available in VGM anyways).
+
+Note: You can have only 12 melody channels if there is two of a percussion
+channel, 15 if there is one of a percussion channel, or up to 18 if there
+is no percussion.
+
+
+== PC-Engine / HuC6280 ==
+
+Command: #EX-PCENGINE
+Macro commands: v (0..31) P (-15..+15) @W (macro) @ (0..7) @G (0..255)
+ @WM (macro) M (1..1023)
+Channel groups: normal (12), FM (2), noise (4)
+
+H (3579545) = Clock rate in Hz.
+
+Normal channels are only up to twelve if the other channels are not used.
+Each noise channel costs one normal slot, and each FM channel costs two
+normal slots.
+
+The @G macro is used for global panning; the high four bits for left
+channel and low four bits for right channel. This affects both chip
+instances (use a direct write command if you want only one).
+
+The @W macro is a waveform of 2, 4, 8, 16, or 32 frames, having numbers 0
+to 31 in it, or having -16 to +15 for frequency modulation waveform, which
+is selected on the FM channel only with the @WM command.
+
+The @ command is usable on the FM channel, and selects the FM depth: 0 for
+no modulation, 1 for 1x modulation, 2 for 16x modulation, and 3 for 256x
+modulation. Numbers 4 to 7 can be used to make the modulator period fixed
+rather than relative to the note being played.
+
+The M command is usable on the FM channel, and is used to multiply the
+period of the modulator waveform by one fourth of the number specified.
+For example, M1 specifies to make the modulator four times as fast as the
+carrier.
+
+
+== NeoGeo Pocket ==
+
+Command: #EX-NGP
+Macro commands: v (0..15) P (-15..+15) @ (0..1)
+Channel groups: square (3), special (1)
+
+H (3072000) = Clock rate in Hz.
+
+This functions mostly like PSG, except the "special" channel can play
+notes or white noise, and that the panning has more range. The @ command
+is only for special channel, where 1 means noise and 0 means tones.
+
+Warning: Is not allowed using this together with #EX-PSG in the same file!
+
+
+== Nintendo Famicom ==
+
+Command: #EX-FAMICOM
+Macro commands: v (0..15) @ (0..3)
+Channel groups: square (4), triangle (2), noise (2)
+
+H (1789772) = Clock rate in Hz. Change this to 1662607 for PAL NES, or to
+1773448 for Dendy. The default value can be used for NTSC and RGB Famicom.
+
+The square channels use @ for duty (0=12.5%, 1=25%, 2=50%, 3=75%).
+
+The triangle channel has no volume control.
+
+For noise channel, select octave 0 for long noise and octave 1 for short
+noise.
+
+DPCM is currently not supported in VGMCK, although you can still use
+direct writes to the DPCM registers.
+
+
+== Nintendo GameBoy Dot Matrix Game ==
+
+Command: #EX-GAMEBOY
+Macro commands: v (0..15) @ (0..3) P (-1..+1) @W (macro) ve (-15..+15)
+Channel groups: square (4), wavetable (2), noise (2)
+
+H (4194304) = Clock rate in Hz.
+
+For square channels, use @ for duty (0=12.5%, 1=25%, 2=50%, 3=75%), and
+volume 0 to 15. Software envelopes are not available for square channels
+on GameBoy; use hardware envelopes (ve) instead.
+
+Wave channel uses a waveform of 32 frames, with values 0 to 15. This
+channel can use only volume 0 to 3, and uses software envelopes.
+
+Noise channel uses volume 0 to 15 and uses hardware envelopes.
+
+
+== Q Sound ==
+
+Command: #EX-QSOUND
+Macro commands: v (0..4095) @S (macro) P (-16..+16)
+Channel groups: normal (16)
+Sample format: signed 8-bits mono
+
+H (4000000) = Clock rate in Hz.
+
+Sample header:
+
+* Loop start
+
+* Loop end
+
+* Pitch shift bits (range: 1 to 16)
+
+* Clock rate for calculating pitch (if negative, uses loop period instead)
+
+* Fixed pitch number (used with negative clock rates)
+
+* Octave shift: If clock rate is positive, the highest octave number
+(default 8), otherwise the lowest octave number (default 0).
+
+Note: It is necessary to set the panning to make it work.
+
+
+== OPLL (Yamaha YM2413) ==
+
+Command: #EX-OPLL
+Macro commands: v (0..15) @ (macro)
+Channel groups: melody (18), rhythm (2)
+
+H (3579545) = Clock rate in Hz.
+
+On melody channels, @ selects a built-in instrument 1 to 15, or with
+sustain built-in instrument 17 to 31, or using 0 to select the same custom
+instrument as other channels, or using @x macros defining custom
+instrument setting if you use @ and the number, if the @x is at least 32.
+You cannot use multiple custom instrument at the same time.
+
+Built-in instrument setting is:
+
+* 0 = Repeat last custom instrument setting
+
+* 1 = Violin
+
+* 2 = Guitar
+
+* 3 = Piano
+
+* 4 = Flute
+
+* 5 = Clarinet
+
+* 6 = Oboe
+
+* 7 = Trumpet
+
+* 8 = Organ
+
+* 9 = Horn
+
+* 10 = Synthesizer
+
+* 11 = Harpsichord
+
+* 12 = Vibraphone
+
+* 13 = Synthesizer bass
+
+* 14 = Acoustic bass
+
+* 15 = Electric guitar
+
+Custom instrument setting is:
+
+* TVSK MMMM = Tremolo, vibrato, sustain, key scale, and multipler, for the
+modulator (similar to the OPL2).
+
+* TVSK MMMM = As above, but for the carrier.
+
+* KKLL LLLL = K is key scaling and L is the attenuation level of the
+modulator (zero means maximum output level).
+
+* KK-Q WFFF = K is key scaling of carrier. Q and W is carrier and
+modulator waveforms; 0 for sine wave and 1 for rectify sine wave. F is the
+feedback amount of modulator.
+
+* AAAA DDDD = Attack and decay for modulator.
+
+* AAAA DDDD = Attack and decay for carrier.
+
+* SSSS RRRR = Sustain and release for modulator. If sustain is zero means
+max volume (no attenuation), higher numbers attenuate sustain level.
+
+* SSSS RRRR = Sustain and release for carrier.
+
+Rhythm channels each take up three slots of the melody. On rhythm
+channels, the @ selects which drums to play by using five bits (one bit
+for each drum). The next nine bits, if any are set, fix the frequency
+register to the specified number.
+
+You can also use @S to mean the same as @ so that you can use sample lists
+to program drum kits into MML.
+
+Apparently this chip can also be used with teletext, but I don't know how.
+(I don't even think teletext has music, so I don't know what is the point
+of that at all.)
+
+
+== OPN2 (Yamaha YM2612) ==
+
+Command: #EX-OPN2
+Macro commands: @G (0..15) @ (macro) P (-1..+1) v (0..127)
+Channel groups: melody (12), supplementary (4)
+
+H (7670454) = Clock rate in Hz.
+
+The set of operators for a channel are defined using a @x macro and then
+selected using the @ command. Each channel has four operators, followed by
+feedback/algorithm, and then for supplementary channels has some
+additional data after that.
+
+For each operator:
+
+* -SDD MMMM = D is detune amount, S is detune direction (0 for up, 1 for
+down). M is a frequency multiplier of the channel frequency, where 0 means
+one half.
+
+* -LLL LLLL = Total level, where zero is the highest volume.
+
+* RR-A AAAA = A is the attack rate. R specifies the influence of the note
+to the envelope rate, where 0 is very small influence and 3 is a lot.
+
+* T--D DDDD = D is the first decay rate. T enables tremolo.
+
+* ---D DDDD = D is the second decay rate.
+
+* LLLL RRRR = L is the high four bits of the level after the first decay,
+where zero is the highest volume. R is the release rate.
+
+* ---- EDAH = This is the SSG-EG setting (use zero normally). E enables
+the SSG-type envelope control. D sets the direction (0 for down, 1 for
+up). A makes the direction up/down alternating after it is finished. H is
+hold; if this is zero, the envelope repeats, and if one, it holds.
+
+The feedback/algorithm part contains as follows:
+
+* --FF FAAA = F is the feedback amount of the first operator. A is the
+algorithm, as follows (where X+Y is additive, and X:Y means X is frequency
+modulating Y): 0 = a:b:c:d, 1 = (a+b):c:d, 2 = (a+(b:c)):d,
+3 = ((a:b)+c:d, 4 = (a:b)+(c:d), 5 = a:(b+c+d), 6 = (a:b)+c+d,
+7 = a+b+c+d.
+
+* --TT T-VV = T controls the sensitivity of the tremolo. V controls the
+sensitivity of the vibrato.
+
+The extra data for supplementary channels has these three entries for each
+of the four operators:
+
+* Octave shift, which ranges from -7 to +7. If the fixed frequency is set,
+it ranges from 0 to 7.
+
+* Fixed frequency. If this is nonzero, it should range from 1 to 2047, and
+replaces the frequency of the note which is played on this channel.
+
+* Volume affect. Allow to set how much the channel volume will attenuate
+this operator, where sixteen means by the same amount and zero means not
+at all.
+
+The @G command controls the LFO, which is used for vibrato and tremolo. It
+affects all channels at once. Zero means turned off. Numbers 8 to 15
+affect the frequency of the LFO, ranging from 4 Hz to 72 Hz.
+
+There can be up to twelve channels in total, so supplementary channels
+will use up the melody channel slots (if it is odd, it will use up two
+slots).
+
+
+== Atari POKEY ==
+
+Command: #EX-POKEY
+Macro commands: v (0..15) @ (0..7) M (-16..+16)
+Channel groups: normal (4), hi-res (2), filtered (2)
+
+H (1789772) = Clock rate in Hz.
+
+p (off) = If set, uses 9-bits poly-counters, otherwise 17-bits.
+
+c (off) = If set, normal channels use 15 KHz clock, otherwise 64 KHz.
+
+x (off) = Makes the M command range from 0 to 255 and makes the filter
+fixed.
+
+The @ command causes poly-counters to be used to make noise; use 7 for
+pure tones. If this is 0 or 4, the option "p" will be used.
+
+You can use M on filtered channels to set the filter multiplier. Positive
+numbers cause multiplication, negative numbers cause division, and zero
+causes a fixed setting for the filter.
+
+You cannot use hi-res and filtered channels together, and using either of
+them takes up two slots of the normal channels for each one used.
+
+
+== General Instruments AY-3-8910 ==
+
+Command: #EX-GI-AY
+Macro commands: v (0..15) @S (0..31) @ (0..31) M (any) ve (any)
+Channel groups: square (6), special (2)
+
+H (1789750) = Clock rate in Hz.
+
+T (0) = Chip type (0=AY8910, 1=AY8912, 2=AY8913, 3=AY8930, 16=YM2149,
+17=YM3439, 18=YMZ284, 19=YMZ294). If AY8930 is selected, it operates in
+compatibility mode, rather than expanded capability mode (for expanded
+capability mode, use #EX-AY8930 instead).
+
+S (1) = Octave shift between envelope and note on special channels.
+
+l (on) = Legacy output.
+
+s (off) = Single output.
+
+d (off) = Discrete output.
+
+r (off) = Raw output.
+
+On square channels, only v and @ can be used, and @ can only range 0 to 3.
+
+On special channels, @ has the full range, and only any one of v and M and
+ve can be used at once; using one overrides the others. In addition, @S is
+used to set the noise period from 0 to 31 (it is not used to select a
+sample on these channels).
+
+The @ uses a 5-bit number, where: Bit0 is cleared to play square waves.
+Bit1 is cleared to play noise. Bit2 is set to cause the envelope to hold;
+if it is clear, it will repeat. Bit3 is set to make the direction
+alternate. Bit4 specifies envelope direction; set for rising and clear for
+falling.
+
+If ve is used, it sets a volume envelope. Positive numbers cause the
+envelope to rise when the key is on, and negative numbers will cause it to
+fall and eventually silence.
+
+If M is used, it is a multiplier for the period if positive, and then is
+divided by 64; if zero or negative, it sets the envelope period directly.
+
+The special channels each take one slot of square channels.
+
+
+== AY8930 ==
+
+Command: #EX-AY8930
+Macro commands: v (0..31) @ (0..255) M (any) ve (any)
+Channel groups: special (6)
+
+H (1789750) = Clock rate in Hz.
+
+S (0) = Octave shift between envelope and note.
+
+l (on) = Legacy output.
+
+s (off) = Single output.
+
+d (off) = Discrete output.
+
+r (off) = Raw output.
+
+This is mostly like the AY-3-8910, although it uses only special channels,
+and there are more bits of the @ command. The @S command is unavailable.
+
+The bit5, bit6, bit7 selects the duty cycle as follows: 0=1/32, 1=1/16,
+2=1/8, 3=1/4, 4=1/2, 5=3/4, 6=7/8, 7=15/16.
+
+Noise can be set up using direct writes.
+
+Warning: Is not allowed using this together with #EX-GI-AY in same file.
+
+Warning: AY8930 does not currently work properly in VGMPlay (probably
+because MAME doesn't emulate AY8930; a new GPL'd emulator ought to be
+written for these sound chips, which will work properly).
+
+
+== Yamaha OPL3 (YMF262) ==
+
+Command: #EX-OPL3
+Macro commands: v (0..63) P (-1..+1) @ (macro) @G (0..15) @S (0..32767)
+Channel groups: two-ops (36), four-ops (12), rhythm (2)
+
+H (14318180) = Clock rate in Hz.
+
+The four-ops channels each take up two slots of the two-ops channels, and
+the rhythm channels each take up three slots of the two-ops channels.
+
+The @ command selects the set of FM operators defined using the @x macros.
+
+For two-ops the @x is defined as the following for each of two operators:
+
+* TVSK MMMM = Set tremolo, vibrato, sustain, envelope scaling, and the
+multiplication factor for this operator, where 0=1/2, 1-10=1-10, 12=12,
+and 14=15.
+
+* KKLL LLLL = Where K is the key scale level to attenuate output level
+towards higher pitch, and L attenuates the output of this operator, where
+0 is the loudest and 63 is quiet.
+
+* AAAA DDDD = Attack and decay envelopes. Higher values cause shorter
+envelopes.
+
+* SSSS RRRR = Sustain level and release envelope.
+
+* ---A -WWW = Waveform select: 0=sine wave, 1=rectify sine wave,
+2=absolute value of sine wave, 3=rising part of absolute value of sine
+wave ("pulse sine"), 4=even periods only of sine wave, 5=even periods of
+absolute of sine wave, 6=square wave, 7=derived square wave (I don't think
+it really is a derived square wave though). A is attenuation override; use
+0 to attenuate this channel by the volume controls and 1 to ignore the
+volume control of this channel.
+
+After that, is the following just once for the entire instrument:
+
+* ---A -FFF = A is algorithm (0=FM, 1=additive). F is the feedback of the
+first operator.
+
+For four-ops the @x uses the same operators but there are now four
+operators, and the part afterward differs:
+
+* --AA -FFF = Now the algorithms are as follows: 0=a:b:c:d. 1=a+(b:c:d).
+2=(a:b)+(c:d). 3=a+(b:c)+d.
+
+Rhythm channels @x uses six operators, and the single one afterward is
+like the one for two operators. Rhythm also uses @S to select which drums
+to play using the low five bits, and if the other bits are set, fixes the
+note frequency to the specified number.
+
+The command @G has the same purpose of OPL2, except that CSW doesn't work.
+
+
+== OPL4 ==
+
+Command: #EX-OPL4
+Macro commands: v (0..127) P (-7..+7) @ (0..3) @S (macro)
+Channel groups: two-ops (36), four-ops (12), rhythm (2), PCM (48)
+Sample format: unsigned 8-bits/16-bits mono, big-endian
+
+H (33868800) = Clock rate in Hz.
+
+This is mostly OPL3, except the PCM channel, which uses the commands
+listed above, instead.
+
+The @ command in PCM channels sets the LFO by bit0 (0=start, 1=stop), and
+sets the reverb by bit1 (0=off, 1=on).
+
+The sample header for PCM channels is:
+
+* Loop start
+
+* Loop end
+
+* Clock rate for calculating pitch
+
+* Octave shift: Shifts octave number; 0 to use direct numbers -7 to +7.
+
+* Data bit: 0 for 8-bits, 1 for 12-bits, 2 for 16-bits.
+
+* --LL LVVV = L is LFO speed, V is vibrato depth.
+
+* AAAA DDDD = A is attack rate and D is decay rate.
+
+* LLLL DDDD = L is first decay level, D is second decay rate.
+
+* CCCC RRRR = C is rate compensation, and R is release rate.
+
+* ---- -TTT = T is tremolo depth.
+
+
+== (EOF) ==

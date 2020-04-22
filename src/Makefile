@@ -40,14 +40,14 @@ clean:
 	rm $(OBJS) $(OBJS_DEBUG) $(MAIN) $(MAIN_DEBUG)
 
 $(MAIN): $(OBJS)
-	$(CC) $(LDFLAGS) -o $(MAIN) $(OBJS)
+	$(CC) -o $(MAIN) $(OBJS) $(LDFLAGS_DEBUG)
 
 $(MAIN_DEBUG): $(OBJS_DEBUG)
-	$(CC) $(LDFLAGS_DEBUG) -o $(MAIN_DEBUG) $(OBJS_DEBUG)
+	$(CC) -o $(MAIN_DEBUG) $(OBJS_DEBUG) $(LDFLAGS_DEBUG)
 
 $(OBJS): $(SRCS)
-	$(CC) $(CFLAGS) -c $(@:.o=.c) -o $@
+	$(CC) -o $@ -c $(@:.o=.c) $(CFLAGS)
 
 $(OBJS_DEBUG): $(SRCS)
-	$(CC) $(CFLAGS_DEBUG) -c $(@:_d.o=.c) -o $@
+	$(CC) -o $@ -c $(@:_d.o=.c) $(CFLAGS_DEBUG)
 
