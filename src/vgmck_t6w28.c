@@ -128,9 +128,9 @@ static Event*x_note_on(int chan,long note,int oct,long dur) {
   Event1*e=malloc(sizeof(Event1));
   e->type=3;
   if (chan != 3) {
-	  e->value=note/(0.9375); // accounting for 15 bit LFSR
+	  e->value=note;
   } else {
-    e->value=note*(0.9375);
+    e->value=note/(0.87890625); // accounting for 15 bit LFSR
   }
   return (Event*)e;
 }
@@ -139,9 +139,9 @@ static Event*x_note_change(int chan,long note,int oct) {
   Event1*e=malloc(sizeof(Event1));
   e->type=3;
   if (chan != 3) {
-	  e->value=note/(0.9375); // accounting for 15 bit LFSR
+	  e->value=note;
   } else {
-    e->value=note*(0.9375);
+    e->value=note/(0.87890625); // accounting for 15 bit LFSR
   }
   return (Event*)e;
 }

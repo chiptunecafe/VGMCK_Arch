@@ -1,5 +1,5 @@
 /*
-  VGMCK (Video Game Music Compiler Kit) version 1.1
+  VGMCK (Video Game Music Compiler Kit) version 1.21
   Licensed under GNU GPL v3 or later version.
 
   Should be compiled with GNU89 mode.
@@ -389,6 +389,8 @@ static inline void parse_global_command(char*cmd) {
     make_equal_temperament();
   }
 
+  // I can't change this to a string compare with "EX-"
+  // Why tho
   if(cmd[0]=='E' && cmd[1]=='X' && cmd[2]=='-') {
     parse_chip_enable(cmd+3,par);
   }
@@ -464,8 +466,8 @@ static inline void parse_global_command(char*cmd) {
   if(!strcmp(cmd,"SYSTEM-J")) {
     add_gd3(5,par);
   }
-
-  if(cmd[0]=='T' && cmd[1]=='E' && cmd[2]=='X' && cmd[3]=='T') {
+  
+  if(!strcmp(cmd,"TEXT")) {
     add_gd3(strtol(cmd+4,0,0),par);
   }
 
@@ -660,7 +662,7 @@ void figure_out_note_values(ChipDef*chip) {
   if(b<0) b=-b;
   j=(-1)<<b;
   for(i=0;i<32;i++) {
-    d=note_freq[i]*basefreq+0.000001;
+    d=note_freq[i]*basefreq;
     if(c) v=(((unsigned long long)q)<<24)/d;
     else v=((unsigned long long)d)*(((unsigned long long)q)<<22);
     u[i]=v;
@@ -1132,7 +1134,7 @@ static inline void help_list_chips(void) {
   }
 }
 
-int main(int argc,char**argv) {
+int main(int argc,char**argv) { // MAIN ROUTINE
   int i;
   if(argc<3) {
     fprintf(stderr,"VGMCK v" VERSION "\nusage: vgmck {input.mml} {output.vgm}\n");
