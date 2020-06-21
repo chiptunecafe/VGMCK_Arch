@@ -42,7 +42,7 @@ jobs:
       if:    runner.os == 'Linux'
       run:   |
         cd src
-        make -j2 CFLAGS_COMMON="-fms-extensions -static" LDFLAGS_COMMON="-lm -static"
+        make -j2 CFLAGS_EXTRA="-static" LDFLAGS_EXTRA="-static"
     - name:  Build [macOS]
       if:    runner.os == 'macOS'
       run:   |
@@ -53,7 +53,7 @@ jobs:
       run:   |
         cd src
         export PATH="/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw32/bin:$PATH"
-        mingw32-make -j2 CFLAGS_COMMON="-fms-extensions -static" LDFLAGS_COMMON="-lm -static"
+        mingw32-make -j2 CFLAGS_EXTRA="-static" LDFLAGS_EXTRA="-static"
 
     - name: Test (Launching binaries)
       run:  |

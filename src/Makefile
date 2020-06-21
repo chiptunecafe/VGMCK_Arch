@@ -24,13 +24,26 @@ MAIN_DEBUG ?= vgmck_d
 
 CC             = gcc
 
+OSX_MINVERSION ?= 10.6
+
 CFLAGS_COMMON  ?= -fms-extensions
 LDFLAGS_COMMON ?= -lm
 
-CFLAGS         ?= $(CFLAGS_COMMON) -O2
-CFLAGS_DEBUG   ?= $(CFLAGS_COMMON) -g
-LDFLAGS        ?= $(LDFLAGS_COMMON) -s -O2
-LDFLAGS_DEBUG  ?= $(LDFLAGS_COMMON) -g
+ifneq ($(OS),Windows_NT)
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Darwin)
+		CFLAGS_COMMON  += -mmacosx-version-min=$(OSX_MINVERSION)
+		LDFLAGS_COMMON += -mmacosx-version-min=$(OSX_MINVERSION)
+	endif
+endif
+
+CFLAGS_EXTRA   ?=
+LDFLAGS_EXTRA  ?=
+
+CFLAGS         ?= $(CFLAGS_COMMON) $(CFLAGS_EXTRA) -O2
+CFLAGS_DEBUG   ?= $(CFLAGS_COMMON) $(CFLAGS_EXTRA) -g
+LDFLAGS        ?= $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) -s -O2
+LDFLAGS_DEBUG  ?= $(LDFLAGS_COMMON) $(LDFLAGS_EXTRA) -g
 
 .PHONY: all clean
 
