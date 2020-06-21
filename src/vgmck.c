@@ -6,6 +6,7 @@
 */
 
 #include "vgmck.h"
+#include <string.h>
 #include <limits.h>
 #define GRAPHIC(x) (((x)&255)>' ')
 #define TAU (6.283185307179586476925286766559005768394)
@@ -388,10 +389,8 @@ static inline void parse_global_command(char*cmd) {
   if(!strcmp(cmd,"EQUAL-TEMPERAMENT")) {
     make_equal_temperament();
   }
-
-  // I can't change this to a string compare with "EX-"
-  // Why tho
-  if(cmd[0]=='E' && cmd[1]=='X' && cmd[2]=='-') {
+  
+  if(memcmp(cmd,"EX-",3) == 0) {
     parse_chip_enable(cmd+3,par);
   }
 
