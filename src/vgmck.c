@@ -1,5 +1,5 @@
 /*
-  VGMCK (Video Game Music Compiler Kit) version 1.21
+  VGMCK (Video Game Music Compiler Kit) version 1.22
   Licensed under GNU GPL v3 or later version.
 
   Should be compiled with GNU89 mode.

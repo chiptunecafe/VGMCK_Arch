@@ -1,5 +1,5 @@
 /*
-  VGMCK (Video Game Music Compiler Kit) version 1.0
+  VGMCK (Video Game Music Compiler Kit) version 1.22
   Licensed under GNU GPL v3 or later version.
 */
 
